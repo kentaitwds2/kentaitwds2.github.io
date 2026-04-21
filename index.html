@@ -1,147 +1,291 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Voice Recorder to n8n</title>
+  <title>工具面板</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet" />
   <style>
-    body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; }
-    button { margin-right: 8px; margin-bottom: 12px; padding: 10px 16px; }
-    #status, #result { margin-top: 12px; white-space: pre-wrap; }
-    audio { display: block; margin-top: 12px; width: 100%; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --border: #2a2a3a;
+      --accent1: #00e5ff;
+      --accent2: #ff3cac;
+      --accent3: #7fff6e;
+      --text: #e8e8f0;
+      --muted: #5a5a72;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans TC', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+    }
+
+    /* Background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glowing orbs */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .header .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .header h1 {
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    button.btn {
+      font-family: 'Noto Sans TC', sans-serif;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* Buttons */
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      width: 100%;
+      padding: 1.2rem 1.8rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: inherit;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+    }
+
+    .btn:active {
+      transform: translateY(0px) scale(0.98);
+    }
+
+    /* Button 1 — 更新 */
+    .btn-1 { --c: var(--accent1); }
+    .btn-1::before { background: linear-gradient(135deg, rgba(0,229,255,0.08), transparent); }
+    .btn-1:hover { border-color: var(--accent1); box-shadow: 0 0 24px rgba(0,229,255,0.2), inset 0 0 24px rgba(0,229,255,0.04); }
+    .btn-1:hover::before { opacity: 1; }
+
+    /* Button 2 — 設定 */
+    .btn-2 { --c: var(--accent2); }
+    .btn-2::before { background: linear-gradient(135deg, rgba(255,60,172,0.08), transparent); }
+    .btn-2:hover { border-color: var(--accent2); box-shadow: 0 0 24px rgba(255,60,172,0.2), inset 0 0 24px rgba(255,60,172,0.04); }
+    .btn-2:hover::before { opacity: 1; }
+
+    /* Button 3 — 測試 */
+    .btn-3 { --c: var(--accent3); }
+    .btn-3::before { background: linear-gradient(135deg, rgba(127,255,110,0.08), transparent); }
+    .btn-3:hover { border-color: var(--accent3); box-shadow: 0 0 24px rgba(127,255,110,0.2), inset 0 0 24px rgba(127,255,110,0.04); }
+    .btn-3:hover::before { opacity: 1; }
+
+    /* Icon circle */
+    .btn-icon {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      border: 1px solid currentColor;
+      color: var(--c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: background 0.2s ease;
+    }
+
+    .btn:hover .btn-icon {
+      background: color-mix(in srgb, var(--c) 15%, transparent);
+    }
+
+    /* Text block */
+    .btn-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      flex: 1;
+    }
+
+    .btn-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--c);
+    }
+
+    .btn-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      word-break: break-all;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 320px;
+    }
+
+    /* Arrow */
+    .btn-arrow {
+      flex-shrink: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .btn:hover .btn-arrow {
+      color: var(--c);
+      transform: translateX(4px);
+    }
+
+    /* Divider */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+    }
+
+    /* Footer */
+    .footer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      margin-top: 0.5rem;
+    }
+
+    /* Entrance animation */
+    .container { animation: fadeUp 0.5s ease both; }
+    .btn:nth-child(3) { animation: fadeUp 0.5s 0.1s ease both; }
+    .btn:nth-child(4) { animation: fadeUp 0.5s 0.2s ease both; }
+    .btn:nth-child(5) { animation: fadeUp 0.5s 0.3s ease both; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 400px) {
+      .btn { padding: 1rem 1.2rem; gap: 1rem; }
+      .btn-icon { width: 38px; height: 38px; font-size: 1rem; }
+      .btn-title { font-size: 1rem; }
+      .btn-sub { display: none; }
+    }
   </style>
 </head>
 <body>
-  <h1>Voice Recorder → n8n Webhook</h1>
+  <div class="container">
+    <div class="header">
+      <div class="label">// CONTROL PANEL</div>
+      <h1>工具面板</h1>
+    </div>
 
-  <button id="startBtn">Start Recording</button>
-  <button id="stopBtn" disabled>Stop Recording</button>
-  <button id="uploadBtn" disabled>Upload to n8n</button>
+    <div class="divider"></div>
 
-  <audio id="player" controls></audio>
+    <button class="btn btn-1" onclick="window.open('https://kentaitwds2.app.n8n.cloud/form/e4879121-72cc-4f6e-a53b-b48395f81bcd','_blank')">
+      <div class="btn-icon">⟳</div>
+      <div class="btn-text">
+        <span class="btn-title">更新</span>
+        <span class="btn-sub">n8n.cloud / form / e4879121…</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </button>
 
-  <div id="status"></div>
-  <div id="result"></div>
+    <button class="btn btn-2" onclick="window.open('https://docs.google.com/spreadsheets/d/1YCY8MtFreHKvcfXl1mb6WB92TaM8SpFJMO5SewBIac4/edit?usp=sharing','_blank')">
+      <div class="btn-icon">⚙</div>
+      <div class="btn-text">
+        <span class="btn-title">設定</span>
+        <span class="btn-sub">docs.google.com / spreadsheets…</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </button>
 
-  <script>
-    const webhookUrl = "https://kentaitwds2.app.n8n.cloud/webhook-test/voice";
+    <button class="btn btn-3" onclick="window.open('https://kentaitwds2.github.io/off_days_viewer.html','_blank')">
+      <div class="btn-icon">✦</div>
+      <div class="btn-text">
+        <span class="btn-title">測試</span>
+        <span class="btn-sub">kentaitwds2.github.io / off_days_viewer.html</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </button>
 
-    const startBtn = document.getElementById("startBtn");
-    const stopBtn = document.getElementById("stopBtn");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const player = document.getElementById("player");
-    const statusEl = document.getElementById("status");
-    const resultEl = document.getElementById("result");
-
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let audioBlob = null;
-    let stream = null;
-
-    function setStatus(text) {
-      statusEl.textContent = text;
-    }
-
-    startBtn.addEventListener("click", async () => {
-      try {
-        resultEl.textContent = "";
-        audioChunks = [];
-        audioBlob = null;
-
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-        let mimeType = "";
-        if (MediaRecorder.isTypeSupported("audio/webm")) {
-          mimeType = "audio/webm";
-        } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
-          mimeType = "audio/mp4";
-        }
-
-        mediaRecorder = mimeType
-          ? new MediaRecorder(stream, { mimeType })
-          : new MediaRecorder(stream);
-
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data && event.data.size > 0) {
-            audioChunks.push(event.data);
-          }
-        };
-
-        mediaRecorder.onstop = () => {
-          const finalType = mimeType || audioChunks[0]?.type || "audio/webm";
-          const extension = finalType.includes("mp4") ? "m4a" : "webm";
-
-          audioBlob = new Blob(audioChunks, { type: finalType });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          player.src = audioUrl;
-          uploadBtn.disabled = false;
-          setStatus(`Recording stopped. File ready: recording.${extension}`);
-        };
-
-        mediaRecorder.start();
-        setStatus("Recording...");
-        startBtn.disabled = true;
-        stopBtn.disabled = false;
-        uploadBtn.disabled = true;
-      } catch (error) {
-        console.error(error);
-        setStatus("Cannot access microphone: " + error.message);
-      }
-    });
-
-    stopBtn.addEventListener("click", () => {
-      if (mediaRecorder && mediaRecorder.state !== "inactive") {
-        mediaRecorder.stop();
-      }
-
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-
-      startBtn.disabled = false;
-      stopBtn.disabled = true;
-    });
-
-    uploadBtn.addEventListener("click", async () => {
-      if (!audioBlob) {
-        setStatus("No audio to upload.");
-        return;
-      }
-
-      try {
-        setStatus("Uploading to n8n...");
-
-        const mimeType = audioBlob.type || "audio/webm";
-        const extension = mimeType.includes("mp4") ? "m4a" : "webm";
-        const file = new File([audioBlob], `recording.${extension}`, { type: mimeType });
-
-        const formData = new FormData();
-        formData.append("audio", file);
-        formData.append("userId", "demo-user");
-        formData.append("note", "Recorded from browser");
-
-        const response = await fetch(webhookUrl, {
-          method: "POST",
-          body: formData
-        });
-
-        const contentType = response.headers.get("content-type") || "";
-        let data;
-
-        if (contentType.includes("application/json")) {
-          data = await response.json();
-          resultEl.textContent = JSON.stringify(data, null, 2);
-        } else {
-          data = await response.text();
-          resultEl.textContent = data;
-        }
-
-        setStatus(`Upload complete. HTTP ${response.status}`);
-      } catch (error) {
-        console.error(error);
-        setStatus("Upload failed: " + error.message);
-      }
-    });
-  </script>
+    <div class="divider"></div>
+    <div class="footer">// RWD · 3 LINKS · READY</div>
+  </div>
 </body>
 </html>
