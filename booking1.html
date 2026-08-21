@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快捷導航</title>
+    <style>
+        :root {
+            --bg-color: #f4f3f0;       /* 莫蘭迪灰白背景 */
+            --card-bg: #ffffff;        /* 卡片純白 */
+            --text-color: #5c636a;     /* 柔和深灰文字 */
+            --btn-1: #8fa397;          /* 莫蘭迪綠 (同步) */
+            --btn-2: #92a4b3;          /* 莫蘭迪藍 (設定) */
+            --btn-3: #c29b8c;          /* 莫蘭迪棕/橘 (測試) */
+            --btn-hover-filter: brightness(0.92);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 400;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: transform 0.2s ease, filter 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn:hover {
+            filter: var(--btn-hover-filter);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* 專屬莫蘭迪按鈕色彩 */
+        .btn-sync { background-color: var(--btn-1); }
+        .btn-settings { background-color: var(--btn-2); }
+        .btn-test { background-color: var(--btn-3); }
+
+        /* RWD 響應式微調 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                box-shadow: none;
+                background-color: transparent;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>快速選單</h1>
+        <div class="button-group">
+            <!-- target="_blank" 確保點擊時另開新視窗 -->
+            <a href="https://whole-reply-seizing.ngrok-free.dev/form/0dddff34-1304-47c5-8514-83ab2aee79c0" class="btn btn-sync" target="_blank" rel="noopener noreferrer">同步</a>
+            <a href="https://docs.google.com/spreadsheets/d/11o6rCVZ_09NzujWvJJL2J36j1g_FbS30nFGkhyWdd4Q/edit?gid=447368645#gid=447368645" class="btn btn-settings" target="_blank" rel="noopener noreferrer">設定</a>
+            <a href="https://kentaitwds2.github.io/off_days_viewer.html" class="btn btn-test" target="_blank" rel="noopener noreferrer">測試</a>
+        </div>
+    </div>
+
+</body>
+</html>
